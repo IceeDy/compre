@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, HTTPException, status
@@ -5,7 +6,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import CurrentUser, DbSession
-from app.models import Customer, Product, Proposal, ProposalItem, Quote, QuoteItem, Supplier
+from app.models import Customer, Product, Proposal, ProposalItem, Quote, QuoteItem, QuoteSupplierRequest, Supplier
+from app.schemas.quote_engine import QuoteComparisonResponse, SupplierRequestCreate, SupplierRequestResponse
 from app.schemas.commercial import (
     CustomerCreate, CustomerResponse, ProductCreate, ProductResponse, ProposalCreate, ProposalResponse,
     QuoteCreate, QuoteResponse, SupplierCreate, SupplierResponse,
@@ -92,6 +94,16 @@ def create_proposal(payload: ProposalCreate, user: CurrentUser, db: DbSession):
         ) for item in payload.items
     ]
     proposal.total = sum((item.total for item in proposal.items), Decimal("0"))
+    request = db.scalar(
+        select(QuoteSupplierRequest).where(
+            QuoteSupplierRequest.quote_id == quote.id,
+            QuoteSupplierRequest.supplier_id == supplier.id,
+            QuoteSupplierRequest.tenant_id == user.tenant_id,
+        )
+    )
+    if request:
+        request.status = "responded"
+        request.responded_at = datetime.now(timezone.utc)
     db.add(proposal); db.commit(); db.refresh(proposal)
     return db.scalar(select(Proposal).options(selectinload(Proposal.items)).where(Proposal.id == proposal.id))
 
@@ -106,3 +118,66 @@ def submit_quote(quote_id: str, user: CurrentUser, db: DbSession):
     quote.status = "submitted"
     db.commit(); db.refresh(quote)
     return quote
+
+
+@router.post("/quotes/{quote_id}/supplier-requests", response_model=list[SupplierRequestResponse])
+def request_supplier_quotes(
+    quote_id: str,
+    payload: SupplierRequestCreate,
+    user: CurrentUser,
+    db: DbSession,
+):
+    quote = db.scalar(
+        select(Quote).where(Quote.id == quote_id, Quote.tenant_id == user.tenant_id)
+    )
+    if not quote:
+        raise HTTPException(404, "Quote not found")
+
+    suppliers = db.scalars(
+        select(Supplier).where(
+            Supplier.id.in_(payload.supplier_ids),
+            Supplier.tenant_id == user.tenant_id,
+            Supplier.is_active.is_(True),
+        )
+    ).all()
+    if len(suppliers) != len(set(payload.supplier_ids)):
+        raise HTTPException(404, "One or more suppliers not found")
+
+    existing = set(
+        db.scalars(
+            select(QuoteSupplierRequest.supplier_id).where(
+                QuoteSupplierRequest.quote_id == quote.id,
+                QuoteSupplierRequest.tenant_id == user.tenant_id,
+            )
+        ).all()
+    )
+    created = []
+    for supplier in suppliers:
+        if supplier.id in existing:
+            continue
+        created.append(
+            QuoteSupplierRequest(
+                tenant_id=user.tenant_id,
+                quote_id=quote.id,
+                supplier_id=supplier.id,
+                status="requested",
+            )
+        )
+    db.add_all(created)
+    db.commit()
+    return [{"supplier_id": row.supplier_id, "status": row.status} for row in created]
+
+
+@router.get("/quotes/{quote_id}/comparison", response_model=QuoteComparisonResponse)
+def compare_quote(quote_id: str, user: CurrentUser, db: DbSession):
+    quote = db.scalar(
+        select(Quote).options(selectinload(Quote.items)).where(
+            Quote.id == quote_id, Quote.tenant_id == user.tenant_id
+        )
+    )
+    if not quote:
+        raise HTTPException(404, "Quote not found")
+
+    from app.services.quote_engine import compare_quote as build_comparison
+
+    return build_comparison(db, quote)
