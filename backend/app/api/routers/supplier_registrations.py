@@ -53,7 +53,7 @@ def create_registration(
         supplier_id=supplier.id,
         customer_id=customer.id,
         status="requested",
-        metadata=payload.metadata,
+        metadata={"requested_fields": payload.requested_fields},
     )
     db.add(registration)
     db.flush()
