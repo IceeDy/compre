@@ -31,7 +31,9 @@
 - [x] Confirmação/rejeição do fornecedor
 - [x] Preparação
 - [x] Expedição
-- [x] Entrega
+- [x] Rastreamento de envio
+- [x] Registro de entrega
+- [x] Comprovação de entrega
 
 ## Fase 3 — Financeiro
 
