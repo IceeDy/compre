@@ -8,6 +8,7 @@ from sqlalchemy.orm import selectinload
 from app.api.deps import CurrentUser, DbSession
 from app.models import Customer, Product, Proposal, ProposalItem, Quote, QuoteItem, QuoteSupplierRequest, Supplier
 from app.schemas.quote_engine import QuoteComparisonResponse, SupplierRequestCreate, SupplierRequestResponse
+from app.services.governance import record_audit, record_event
 from app.schemas.commercial import (
     CustomerCreate, CustomerResponse, ProductCreate, ProductResponse, ProposalCreate, ProposalResponse,
     QuoteCreate, QuoteResponse, SupplierCreate, SupplierResponse,
@@ -63,7 +64,16 @@ def create_quote(payload: QuoteCreate, user: CurrentUser, db: DbSession):
         raise HTTPException(404, "One or more products not found")
     quote = Quote(tenant_id=user.tenant_id, customer_id=customer.id, notes=payload.notes)
     quote.items = [QuoteItem(**item.model_dump()) for item in payload.items]
-    db.add(quote); db.commit(); db.refresh(quote)
+    db.add(quote)
+    db.flush()
+    record_audit(db, tenant_id=user.tenant_id, actor_user_id=user.id, action="quote.created", entity_type="quote", entity_id=quote.id)
+    record_event(
+        db, tenant_id=user.tenant_id, event_key=f"quote:{quote.id}:created",
+        event_type="QuoteCreated", aggregate_type="quote", aggregate_id=quote.id,
+        payload={"customer_id": str(customer.id), "item_count": len(quote.items)},
+    )
+    db.commit()
+    db.refresh(quote)
     return db.scalar(select(Quote).options(selectinload(Quote.items)).where(Quote.id == quote.id))
 
 
@@ -108,7 +118,19 @@ def create_proposal(payload: ProposalCreate, user: CurrentUser, db: DbSession):
     if request:
         request.status = "responded"
         request.responded_at = datetime.now(timezone.utc)
-    db.add(proposal); db.commit(); db.refresh(proposal)
+    db.add(proposal)
+    db.flush()
+    record_audit(
+        db, tenant_id=user.tenant_id, actor_user_id=user.id,
+        action="supplier.proposal_received", entity_type="proposal", entity_id=proposal.id,
+        metadata={"supplier_id": str(supplier.id), "quote_id": str(quote.id)},
+    )
+    record_event(
+        db, tenant_id=user.tenant_id, event_key=f"proposal:{proposal.id}:received",
+        event_type="SupplierResponseReceived", aggregate_type="proposal", aggregate_id=proposal.id,
+        payload={"supplier_id": str(supplier.id), "quote_id": str(quote.id), "total": str(proposal.total)},
+    )
+    db.commit(); db.refresh(proposal)
     return db.scalar(select(Proposal).options(selectinload(Proposal.items)).where(Proposal.id == proposal.id))
 
 
@@ -168,6 +190,17 @@ def request_supplier_quotes(
             )
         )
     db.add_all(created)
+    for row in created:
+        record_audit(
+            db, tenant_id=user.tenant_id, actor_user_id=user.id,
+            action="quote.supplier_requested", entity_type="quote",
+            entity_id=quote.id, metadata={"supplier_id": str(row.supplier_id)},
+        )
+        record_event(
+            db, tenant_id=user.tenant_id, event_key=f"quote:{quote.id}:supplier-requested:{row.supplier_id}",
+            event_type="SupplierQuoteRequested", aggregate_type="quote", aggregate_id=quote.id,
+            payload={"supplier_id": str(row.supplier_id)},
+        )
     db.commit()
     return [{"supplier_id": row.supplier_id, "status": row.status} for row in created]
 
