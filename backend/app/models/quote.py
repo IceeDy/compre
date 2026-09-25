@@ -22,6 +22,7 @@ class Quote(Base):
     customer = relationship("Customer", back_populates="quotes")
     items = relationship("QuoteItem", back_populates="quote", cascade="all, delete-orphan")
     proposals = relationship("Proposal", back_populates="quote", cascade="all, delete-orphan")
+    supplier_requests = relationship("QuoteSupplierRequest", back_populates="quote", cascade="all, delete-orphan")
 
 
 class QuoteItem(Base):
