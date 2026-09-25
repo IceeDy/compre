@@ -1,8 +1,11 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
 
 from app.api.deps import CurrentUser, require_roles
 
 router = APIRouter(prefix="/users", tags=["users"])
+AdminUser = Annotated[object, Depends(require_roles("admin"))]
 
 
 @router.get("/me")
@@ -17,5 +20,5 @@ def current_user(user: CurrentUser) -> dict:
 
 
 @router.get("/admin-check")
-def admin_check(user=Depends(require_roles("admin"))) -> dict:
+def admin_check(user: AdminUser) -> dict:
     return {"ok": True, "user_id": str(user.id)}
