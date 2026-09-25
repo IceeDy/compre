@@ -170,3 +170,56 @@ def test_quote_engine_compares_best_mix_and_nonresponsive_suppliers(client):
     assert best_by_item[items[0]["id"]]["best_supplier_id"] == supplier_b["id"]
     assert best_by_item[items[1]["id"]]["best_unit_price"] == "19.00"
     assert best_by_item[items[1]["id"]]["best_supplier_id"] == supplier_b["id"]
+
+
+def test_quote_and_order_generate_audit_and_events(client):
+    assert register(client, "audit-a", "audit@test.example").status_code == 201
+    token = login(client, "audit@test.example")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    customer = client.post("/api/v1/commercial/customers", headers=headers, json={"name": "Cliente Audit"}).json()
+    product = client.post(
+        "/api/v1/commercial/products",
+        headers=headers,
+        json={"sku": "AUD-001", "name": "Produto Audit", "unit": "UN", "reference_price": "10.00"},
+    ).json()
+    quote = client.post(
+        "/api/v1/commercial/quotes",
+        headers=headers,
+        json={"customer_id": customer["id"], "items": [{"product_id": product["id"], "quantity": 2}]},
+    ).json()
+    supplier = client.post(
+        "/api/v1/commercial/suppliers", headers=headers, json={"name": "Fornecedor Audit"}
+    ).json()
+    request = client.post(
+        f"/api/v1/commercial/quotes/{quote['id']}/supplier-requests",
+        headers=headers,
+        json={"supplier_ids": [supplier["id"]]},
+    )
+    assert request.status_code == 200
+
+    proposal = client.post(
+        "/api/v1/commercial/proposals",
+        headers=headers,
+        json={
+            "quote_id": quote["id"],
+            "supplier_id": supplier["id"],
+            "items": [{"quote_item_id": quote["items"][0]["id"], "unit_price": "8.00", "quantity": 2}],
+        },
+    )
+    assert proposal.status_code == 201
+
+    order = client.post(
+        f"/api/v1/orders/from-proposal/{proposal.json()['id']}", headers=headers
+    )
+    assert order.status_code == 201
+
+    from app.models import AuditLog, DomainEvent
+    from app.db.session import SessionLocal
+
+    with SessionLocal() as db:
+        audits = db.query(AuditLog).filter(AuditLog.tenant_id == __import__("uuid").UUID(quote["tenant_id"])).all()
+        events = db.query(DomainEvent).filter(DomainEvent.tenant_id == __import__("uuid").UUID(quote["tenant_id"])).all()
+
+    assert {a.action for a in audits} >= {"quote.created", "quote.supplier_requested", "supplier.proposal_received", "order.created"}
+    assert {e.event_type for e in events} >= {"QuoteCreated", "SupplierQuoteRequested", "SupplierResponseReceived", "OrderCreated"}
