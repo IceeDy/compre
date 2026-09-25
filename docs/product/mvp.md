@@ -6,24 +6,32 @@
 - [x] Arquitetura inicial
 - [x] Modelo de domínios
 - [x] Princípios de LGPD
-- [ ] PostgreSQL
-- [ ] Alembic
-- [ ] Autenticação
-- [ ] Tenancy
-- [ ] RBAC
-- [ ] CI
+- [x] PostgreSQL
+- [x] Alembic
+- [x] Autenticação
+- [x] Tenancy
+- [x] RBAC
+- [x] CI
 
 ## Fase 2 — Operação comercial
 
-- [ ] Cadastro de cliente
-- [ ] Cadastro de fornecedor
-- [ ] Catálogo
-- [ ] Cotação
-- [ ] Itens de cotação
-- [ ] Comparação de propostas
-- [ ] Aprovação
-- [ ] Pedido
-- [ ] Status de execução
+- [x] Cadastro de cliente
+- [x] Cadastro de fornecedor
+- [x] Catálogo
+- [x] Cotação
+- [x] Itens de cotação
+- [x] Solicitação de propostas aos fornecedores
+- [x] Comparação de propostas
+- [x] Aprovação
+- [x] Pedido comercial
+- [x] Auditoria e eventos de domínio
+- [x] Cadastro assíncrono de cliente no fornecedor
+- [x] Liberação do pedido condicionada ao fluxo de cadastro quando aplicável
+- [x] Pedido operacional ao fornecedor
+- [x] Confirmação/rejeição do fornecedor
+- [x] Preparação
+- [x] Expedição
+- [x] Entrega
 
 ## Fase 3 — Financeiro
 
