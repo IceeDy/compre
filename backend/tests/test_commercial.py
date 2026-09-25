@@ -66,8 +66,11 @@ def test_cross_tenant_resources_are_rejected(client):
     token_y = login(client, "y@test.example")
     headers_y = {"Authorization": f"Bearer {token_y}"}
 
+    product_y = client.post("/api/v1/commercial/products", headers=headers_y, json={
+        "sku": "Y-001", "name": "Product Y", "unit": "UN"
+    })
     quote = client.post("/api/v1/commercial/quotes", headers=headers_y, json={
         "customer_id": customer_id,
-        "items": [],
+        "items": [{"product_id": product_y.json()["id"], "quantity": 1}],
     })
-    assert quote.status_code == 422
+    assert quote.status_code == 404
