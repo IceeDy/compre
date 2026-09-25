@@ -22,7 +22,11 @@ from app.services.governance import record_audit, record_event
 router = APIRouter(prefix="/finance", tags=["finance"])
 
 
-@router.post("/commission-rules", response_model=CommissionRuleResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/commission-rules",
+    response_model=CommissionRuleResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_commission_rule(payload: CommissionRuleCreate, user: CurrentUser, db: DbSession):
     if payload.supplier_id:
         supplier = db.scalar(
@@ -50,8 +54,14 @@ def list_commission_rules(user: CurrentUser, db: DbSession):
     ).all()
 
 
-@router.post("/orders/{order_id}/initialize", response_model=OrderFinancialResponse, status_code=status.HTTP_201_CREATED)
-def initialize_financial(order_id: str, payload: FinancialInitializeRequest, user: CurrentUser, db: DbSession):
+@router.post(
+    "/orders/{order_id}/initialize",
+    response_model=OrderFinancialResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def initialize_financial(
+    order_id: str, payload: FinancialInitializeRequest, user: CurrentUser, db: DbSession
+):
     order = db.scalar(
         select(Order)
         .options(selectinload(Order.proposal))
@@ -170,7 +180,10 @@ def update_payment(payment_id: str, payload: PaymentUpdate, user: CurrentUser, d
         "partially_refunded": {"refunded"},
         "failed": set(),
     }
-    if payload.status != payment.status and payload.status not in allowed.get(payment.status, set()):
+    if (
+        payload.status != payment.status
+        and payload.status not in allowed.get(payment.status, set())
+    ):
         raise HTTPException(409, "Invalid payment status transition")
     payment.status = payload.status
     if payload.provider_reference:
@@ -189,14 +202,18 @@ def update_payment(payment_id: str, payload: PaymentUpdate, user: CurrentUser, d
 @router.get("/payments", response_model=list[PaymentResponse])
 def list_payments(user: CurrentUser, db: DbSession):
     return db.scalars(
-        select(Payment).where(Payment.tenant_id == user.tenant_id).order_by(Payment.created_at.desc())
+        select(Payment)
+        .where(Payment.tenant_id == user.tenant_id)
+        .order_by(Payment.created_at.desc())
     ).all()
 
 
 @router.get("/settlements", response_model=list[SettlementResponse])
 def list_settlements(user: CurrentUser, db: DbSession):
     return db.scalars(
-        select(Settlement).where(Settlement.tenant_id == user.tenant_id).order_by(Settlement.created_at.desc())
+        select(Settlement)
+        .where(Settlement.tenant_id == user.tenant_id)
+        .order_by(Settlement.created_at.desc())
     ).all()
 
 
@@ -216,7 +233,9 @@ def pay_settlement(order_id: str, user: CurrentUser, db: DbSession):
     settlement.paid_at = datetime.now(timezone.utc)
     record_event(
         db, user.tenant_id, f"settlement:{settlement.id}:paid", "SettlementPaid",
-        "settlement", settlement.id, {"order_id": str(settlement.order_id), "amount": str(settlement.amount)},
+        "settlement",
+        settlement.id,
+        {"order_id": str(settlement.order_id), "amount": str(settlement.amount)},
     )
     db.commit()
     db.refresh(settlement)
