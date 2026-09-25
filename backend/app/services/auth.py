@@ -1,5 +1,3 @@
-import uuid
-
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -17,25 +15,14 @@ def normalize_email(email: str) -> str:
     return email.strip().lower()
 
 
-def register_tenant(
-    db: Session,
-    *,
-    tenant_name: str,
-    tenant_slug: str,
-    full_name: str,
-    email: str,
-    password: str,
-) -> User:
+def register_tenant(db: Session, *, tenant_name: str, tenant_slug: str, full_name: str, email: str, password: str) -> User:
     email = normalize_email(email)
     tenant_slug = tenant_slug.strip().lower()
-
     if db.scalar(select(Tenant).where(Tenant.slug == tenant_slug)):
         raise AuthError("tenant_slug_already_exists")
-
     tenant = Tenant(name=tenant_name.strip(), slug=tenant_slug)
     db.add(tenant)
     db.flush()
-
     role = Role(name="admin", tenant_id=tenant.id)
     user = User(
         tenant_id=tenant.id,
