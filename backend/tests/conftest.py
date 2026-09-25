@@ -21,7 +21,7 @@ TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=Fals
 
 
 @pytest.fixture(scope="session", autouse=True)
-def database() -> Generator[None, None, None]:
+def database() -> Generator[None]:
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield
@@ -29,7 +29,7 @@ def database() -> Generator[None, None, None]:
 
 
 @pytest.fixture
-def db() -> Generator[Session, None, None]:
+def db() -> Generator[Session]:
     session = TestingSessionLocal()
     try:
         yield session
@@ -39,7 +39,7 @@ def db() -> Generator[Session, None, None]:
 
 
 @pytest.fixture
-def client(db: Session) -> Generator[TestClient, None, None]:
+def client(db: Session) -> Generator[TestClient]:
     def override_get_db() -> Generator[Session, None, None]:
         yield db
 
