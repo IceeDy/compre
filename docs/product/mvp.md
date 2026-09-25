@@ -37,10 +37,14 @@
 
 ## Fase 3 — Financeiro
 
-- [ ] Pagamento
-- [ ] Comissão
-- [ ] Repasses
-- [ ] Conciliação
+- [x] Snapshot financeiro por pedido
+- [x] Regras de comissão
+- [x] Geração da comissão
+- [x] Registro de pagamento
+- [x] Repasse ao fornecedor
+- [x] Conciliação do repasse
+- [ ] Integração com PSP/gateway
+- [ ] Conciliação bancária automatizada
 
 ## Fase 4 — Intelligence
 
