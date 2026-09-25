@@ -26,3 +26,7 @@ O COMPRE conecta compradores e fornecedores, centralizando cotação, proposta, 
 Cliente -> Cotação -> Proposta -> Aprovação -> Pagamento -> Pedido ao fornecedor -> Entrega -> Conclusão -> Comissão.
 
 Consulte docs/architecture/overview.md e docs/product/mvp.md.
+
+## Phase 1
+
+Identity, PostgreSQL persistence, Alembic migrations, JWT authentication, multi-tenancy, tenant-scoped RBAC, Docker runtime, and integration tests are implemented.
