@@ -1,6 +1,6 @@
-from collections.abc import Callable, Generator
-from typing import Annotated, Any
 import uuid
+from collections.abc import Callable
+from typing import Annotated, Any
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -22,7 +22,6 @@ def get_current_user(
 ) -> User:
     if not credentials or credentials.scheme.lower() != "bearer":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-
     try:
         payload: dict[str, Any] = decode_access_token(credentials.credentials)
         user_id = uuid.UUID(str(payload["sub"]))
@@ -31,7 +30,6 @@ def get_current_user(
             raise ValueError
     except (KeyError, ValueError, TypeError, jwt.PyJWTError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from None
-
     user = db.scalar(
         select(User)
         .options(selectinload(User.roles))
@@ -39,7 +37,6 @@ def get_current_user(
     )
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-
     return user
 
 
@@ -52,5 +49,4 @@ def require_roles(*allowed_roles: str) -> Callable[[User], User]:
         if not roles.intersection(allowed_roles):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
         return user
-
     return dependency
