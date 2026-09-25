@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class SupplierRegistrationCreate(BaseModel):
     supplier_id: UUID
     customer_id: UUID
-    metadata: dict = Field(default_factory=dict)
+    requested_fields: list[str] = Field(default_factory=list, max_length=50)
 
 
 class SupplierRegistrationUpdate(BaseModel):
