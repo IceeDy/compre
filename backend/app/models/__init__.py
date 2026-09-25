@@ -1,4 +1,6 @@
+from .audit_log import AuditLog
 from .customer import Customer
+from .domain_event import DomainEvent
 from .order import Order, OrderItem
 from .product import Product
 from .proposal import Proposal, ProposalItem
@@ -10,6 +12,6 @@ from .tenant import Tenant
 from .user import User
 
 __all__ = [
-    "Customer", "Order", "OrderItem", "Product", "Proposal", "ProposalItem",
+    "AuditLog", "Customer", "DomainEvent", "Order", "OrderItem", "Product", "Proposal", "ProposalItem",
     "Quote", "QuoteItem", "QuoteSupplierRequest", "Role", "Supplier", "Tenant", "User",
 ]
