@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.api.deps import CurrentUser, DbSession, require_roles
+from app.api.deps import CurrentUser, DbSession
 from app.models import Customer, Product, Proposal, ProposalItem, Quote, QuoteItem, Supplier
 from app.schemas.commercial import (
     CustomerCreate, CustomerResponse, ProductCreate, ProductResponse, ProposalCreate, ProposalResponse,
@@ -97,7 +97,7 @@ def create_proposal(payload: ProposalCreate, user: CurrentUser, db: DbSession):
 
 
 @router.post("/quotes/{quote_id}/submit", response_model=QuoteResponse)
-def submit_quote(quote_id, user: CurrentUser, db: DbSession):
+def submit_quote(quote_id: str, user: CurrentUser, db: DbSession):
     quote = db.scalar(select(Quote).options(selectinload(Quote.items)).where(Quote.id == quote_id, Quote.tenant_id == user.tenant_id))
     if not quote:
         raise HTTPException(404, "Quote not found")
