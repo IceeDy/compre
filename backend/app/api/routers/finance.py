@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import CurrentUser, DbSession
-from app.models import CommissionRule, Order, OrderFinancial, Payment, Settlement
+from app.models import CommissionRule, Order, OrderFinancial, Payment, Settlement, Supplier
 from app.schemas.finance import (
     CommissionRuleCreate,
     CommissionRuleResponse,
@@ -25,11 +25,6 @@ router = APIRouter(prefix="/finance", tags=["finance"])
 @router.post("/commission-rules", response_model=CommissionRuleResponse, status_code=status.HTTP_201_CREATED)
 def create_commission_rule(payload: CommissionRuleCreate, user: CurrentUser, db: DbSession):
     if payload.supplier_id:
-        supplier = db.scalar(
-            select(Order.proposal).where(False)
-        )
-        del supplier
-        from app.models import Supplier
         supplier = db.scalar(
             select(Supplier).where(
                 Supplier.id == payload.supplier_id,
