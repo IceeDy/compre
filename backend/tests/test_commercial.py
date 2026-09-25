@@ -74,3 +74,99 @@ def test_cross_tenant_resources_are_rejected(client):
         "items": [{"product_id": product_y.json()["id"], "quantity": 1}],
     })
     assert quote.status_code == 404
+
+
+def test_quote_engine_compares_best_mix_and_nonresponsive_suppliers(client):
+    assert register(client, "engine-a", "engine@test.example").status_code == 201
+    token = login(client, "engine@test.example")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    customer = client.post(
+        "/api/v1/commercial/customers", headers=headers, json={"name": "Cliente Engine"}
+    ).json()
+    product_a = client.post(
+        "/api/v1/commercial/products",
+        headers=headers,
+        json={"sku": "A-001", "name": "Produto A", "unit": "UN", "reference_price": "12.00"},
+    ).json()
+    product_b = client.post(
+        "/api/v1/commercial/products",
+        headers=headers,
+        json={"sku": "B-001", "name": "Produto B", "unit": "UN", "reference_price": "20.00"},
+    ).json()
+
+    quote = client.post(
+        "/api/v1/commercial/quotes",
+        headers=headers,
+        json={
+            "customer_id": customer["id"],
+            "items": [
+                {"product_id": product_a["id"], "quantity": 10, "target_price": "11.00"},
+                {"product_id": product_b["id"], "quantity": 5, "target_price": "19.00"},
+            ],
+        },
+    ).json()
+
+    supplier_a = client.post(
+        "/api/v1/commercial/suppliers", headers=headers, json={"name": "Fornecedor A"}
+    ).json()
+    supplier_b = client.post(
+        "/api/v1/commercial/suppliers", headers=headers, json={"name": "Fornecedor B"}
+    ).json()
+    supplier_c = client.post(
+        "/api/v1/commercial/suppliers", headers=headers, json={"name": "Fornecedor C"}
+    ).json()
+
+    requested = client.post(
+        f"/api/v1/commercial/quotes/{quote['id']}/supplier-requests",
+        headers=headers,
+        json={"supplier_ids": [supplier_a["id"], supplier_b["id"], supplier_c["id"]]},
+    )
+    assert requested.status_code == 200
+    assert len(requested.json()) == 3
+
+    items = quote["items"]
+    proposal_a = client.post(
+        "/api/v1/commercial/proposals",
+        headers=headers,
+        json={
+            "quote_id": quote["id"],
+            "supplier_id": supplier_a["id"],
+            "items": [
+                {"quote_item_id": items[0]["id"], "unit_price": "10.00", "quantity": 10},
+                {"quote_item_id": items[1]["id"], "unit_price": "21.00", "quantity": 5},
+            ],
+        },
+    )
+    assert proposal_a.status_code == 201
+
+    proposal_b = client.post(
+        "/api/v1/commercial/proposals",
+        headers=headers,
+        json={
+            "quote_id": quote["id"],
+            "supplier_id": supplier_b["id"],
+            "items": [
+                {"quote_item_id": items[0]["id"], "unit_price": "9.50", "quantity": 10},
+                {"quote_item_id": items[1]["id"], "unit_price": "19.00", "quantity": 5},
+            ],
+        },
+    )
+    assert proposal_b.status_code == 201
+
+    comparison = client.get(
+        f"/api/v1/commercial/quotes/{quote['id']}/comparison", headers=headers
+    )
+    assert comparison.status_code == 200
+    data = comparison.json()
+
+    assert data["item_count"] == 2
+    assert data["covered_item_count"] == 2
+    assert data["best_mix_total"] == "190.00"
+    assert {row["status"] for row in data["suppliers"]} == {"responded", "requested"}
+
+    best_by_item = {row["quote_item_id"]: row for row in data["items"]}
+    assert best_by_item[items[0]["id"]]["best_unit_price"] == "9.50"
+    assert best_by_item[items[0]["id"]]["best_supplier_id"] == supplier_b["id"]
+    assert best_by_item[items[1]["id"]]["best_unit_price"] == "19.00"
+    assert best_by_item[items[1]["id"]]["best_supplier_id"] == supplier_b["id"]
