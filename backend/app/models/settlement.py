@@ -23,7 +23,10 @@ class Settlement(Base):
         UUID(as_uuid=True), ForeignKey("orders.id", ondelete="CASCADE"), nullable=False, index=True
     )
     supplier_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("suppliers.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("suppliers.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     financial_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("order_financials.id", ondelete="CASCADE"), nullable=False
