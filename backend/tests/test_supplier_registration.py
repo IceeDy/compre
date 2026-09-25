@@ -49,7 +49,7 @@ def test_supplier_registration_is_asynchronous_and_blocks_only_order_release(cli
         json={
             "supplier_id": supplier["id"],
             "customer_id": customer["id"],
-            "metadata": {"requested_fields": ["document", "billing_address"]},
+            "requested_fields": ["document", "billing_address"],
         },
     )
     assert registration.status_code == 201
