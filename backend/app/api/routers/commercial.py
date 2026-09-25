@@ -84,6 +84,10 @@ def create_proposal(payload: ProposalCreate, user: CurrentUser, db: DbSession):
     valid_items = {item.id: item for item in quote.items}
     if any(item.quote_item_id not in valid_items for item in payload.items):
         raise HTTPException(400, "Proposal contains an item outside the quote")
+    if len({item.quote_item_id for item in payload.items}) != len(payload.items):
+        raise HTTPException(400, "Proposal contains duplicate quote items")
+    if any(item.quantity != valid_items[item.quote_item_id].quantity for item in payload.items):
+        raise HTTPException(400, "Proposal quantity must match the requested quantity")
     proposal = Proposal(tenant_id=user.tenant_id, quote_id=quote.id, supplier_id=supplier.id)
     proposal.items = [
         ProposalItem(
