@@ -30,3 +30,6 @@ Consulte docs/architecture/overview.md e docs/product/mvp.md.
 ## Phase 1
 
 Identity, PostgreSQL persistence, Alembic migrations, JWT authentication, multi-tenancy, tenant-scoped RBAC, Docker runtime, and integration tests are implemented.
+
+
+CI validation: end-to-end finance lifecycle coverage is included in the test suite.
