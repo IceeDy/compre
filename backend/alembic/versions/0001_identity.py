@@ -4,8 +4,8 @@ Revision ID: 0001_identity
 Revises:
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 
 
