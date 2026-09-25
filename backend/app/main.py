@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routers import auth, tenants, users
+from app.api.routers import auth, commercial, orders, tenants, users
 from app.core.config import get_settings
 
 
@@ -20,6 +20,8 @@ def create_app() -> FastAPI:
     app.include_router(auth.router, prefix="/api/v1")
     app.include_router(tenants.router, prefix="/api/v1")
     app.include_router(users.router, prefix="/api/v1")
+    app.include_router(commercial.router, prefix="/api/v1")
+    app.include_router(orders.router, prefix="/api/v1")
 
     @app.get("/health", tags=["health"])
     def health() -> dict[str, str]:
