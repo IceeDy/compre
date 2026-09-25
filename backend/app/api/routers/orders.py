@@ -5,6 +5,7 @@ from sqlalchemy.orm import selectinload
 from app.api.deps import CurrentUser, DbSession
 from app.models import Order, OrderItem, Proposal, Quote, QuoteItem
 from app.schemas.commercial import OrderResponse
+from app.services.governance import record_audit, record_event
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -36,7 +37,19 @@ def create_order(proposal_id: str, user: CurrentUser, db: DbSession):
         ))
     proposal.status = "accepted"
     proposal.quote.status = "approved"
-    db.add(order); db.commit(); db.refresh(order)
+    db.add(order)
+    db.flush()
+    record_audit(
+        db, tenant_id=user.tenant_id, actor_user_id=user.id,
+        action="order.created", entity_type="order", entity_id=order.id,
+        metadata={"proposal_id": str(proposal.id), "total": str(order.total)},
+    )
+    record_event(
+        db, tenant_id=user.tenant_id, event_key=f"order:{order.id}:created",
+        event_type="OrderCreated", aggregate_type="order", aggregate_id=order.id,
+        payload={"proposal_id": str(proposal.id), "customer_id": str(order.customer_id), "total": str(order.total)},
+    )
+    db.commit(); db.refresh(order)
     return order
 
 
