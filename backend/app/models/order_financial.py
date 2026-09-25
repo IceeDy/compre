@@ -23,7 +23,10 @@ class OrderFinancial(Base):
         index=True,
     )
     order_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("orders.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("orders.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     gross_amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
     commission_rate: Mapped[Decimal] = mapped_column(Numeric(7, 4), nullable=False, default=0)
