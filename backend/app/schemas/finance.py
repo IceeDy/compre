@@ -55,7 +55,9 @@ class PaymentCreate(BaseModel):
 
 
 class PaymentUpdate(BaseModel):
-    status: str = Field(pattern=r"^(pending|authorized|paid|failed|cancelled|refunded|partially_refunded)$")
+    status: str = Field(
+        pattern=r"^(pending|authorized|paid|failed|cancelled|refunded|partially_refunded)$"
+    )
     provider_reference: str | None = Field(default=None, max_length=160)
 
 
