@@ -2,20 +2,52 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   pull_request:
 
 jobs:
-  backend:
+  test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: compre_test
+          POSTGRES_USER: compre
+          POSTGRES_PASSWORD: compre
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U compre -d compre_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     defaults:
       run:
         working-directory: backend
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - run: pip install ".[dev]"
-      - run: ruff check .
-      - run: pytest
+
+      - name: Install dependencies
+        run: pip install ".[dev]"
+
+      - name: Check formatting and lint
+        run: ruff check .
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: postgresql+psycopg://compre:compre@localhost:5432/compre_test
+        run: alembic upgrade head
+
+      - name: Run tests
+        env:
+          TEST_DATABASE_URL: postgresql+psycopg://compre:compre@localhost:5432/compre_test
+          DATABASE_URL: postgresql+psycopg://compre:compre@localhost:5432/compre_test
+          JWT_SECRET: test-secret
+        run: pytest -q
