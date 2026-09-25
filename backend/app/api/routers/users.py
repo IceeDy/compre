@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.api.deps import CurrentUser, require_roles
 
@@ -17,5 +17,5 @@ def current_user(user: CurrentUser) -> dict:
 
 
 @router.get("/admin-check")
-def admin_check(user=__import__("fastapi").Depends(require_roles("admin"))) -> dict:
+def admin_check(user=Depends(require_roles("admin"))) -> dict:
     return {"ok": True, "user_id": str(user.id)}
