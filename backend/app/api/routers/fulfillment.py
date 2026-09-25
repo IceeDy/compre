@@ -161,6 +161,29 @@ def update_delivery(
         delivery.delivered_at = datetime.now(timezone.utc)
 
     db.flush()
+
+    if payload.status == "delivered":
+        shipment = db.scalar(
+            select(Shipment).where(
+                Shipment.id == delivery.shipment_id,
+                Shipment.tenant_id == user.tenant_id,
+            )
+        )
+        if not shipment:
+            raise HTTPException(404, "Shipment not found")
+        supplier_order = db.scalar(
+            select(SupplierOrder).where(
+                SupplierOrder.id == shipment.supplier_order_id,
+                SupplierOrder.tenant_id == user.tenant_id,
+            )
+        )
+        if not supplier_order:
+            raise HTTPException(404, "Supplier order not found")
+        if supplier_order.status != "shipped":
+            raise HTTPException(409, "Supplier order is not ready for delivery completion")
+        supplier_order.status = "delivered"
+        supplier_order.delivered_at = delivery.delivered_at
+
     record_audit(
         db,
         tenant_id=user.tenant_id,
