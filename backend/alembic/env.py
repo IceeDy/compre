@@ -8,6 +8,7 @@ from app.db.base import Base
 from app.models import (  # noqa: F401
     AuditLog,
     Customer,
+    Delivery,
     DomainEvent,
     Order,
     OrderItem,
@@ -18,6 +19,7 @@ from app.models import (  # noqa: F401
     QuoteItem,
     QuoteSupplierRequest,
     Role,
+    Shipment,
     Supplier,
     SupplierCustomerRegistration,
     SupplierOrder,
