@@ -89,20 +89,6 @@ def upgrade() -> None:
     op.create_index("ix_order_items_order_id", "order_items", ["order_id"])
 
 
-    op.create_table("quote_supplier_requests",
-        col("id", primary_key=True, nullable=False),
-        col("tenant_id", "tenants.id", ondelete="CASCADE", nullable=False),
-        col("quote_id", "quotes.id", ondelete="CASCADE", nullable=False),
-        col("supplier_id", "suppliers.id", ondelete="CASCADE", nullable=False),
-        sa.Column("status", sa.String(30), nullable=False, server_default="requested"),
-        sa.Column("requested_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.Column("responded_at", sa.DateTime(timezone=True)),
-        sa.UniqueConstraint("quote_id", "supplier_id", name="uq_quote_supplier_request"))
-    op.create_index("ix_quote_supplier_requests_tenant_id", "quote_supplier_requests", ["tenant_id"])
-    op.create_index("ix_quote_supplier_requests_quote_id", "quote_supplier_requests", ["quote_id"])
-    op.create_index("ix_quote_supplier_requests_supplier_id", "quote_supplier_requests", ["supplier_id"])
-
-
 def downgrade() -> None:
     op.drop_table("quote_supplier_requests")
     for name in ["order_items", "orders", "proposal_items", "proposals", "quote_items", "quotes", "products", "suppliers", "customers"]:
