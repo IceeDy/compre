@@ -23,7 +23,7 @@ def _event_type(status_value: str) -> str:
         "confirmed": "SupplierOrderConfirmed",
         "rejected": "SupplierOrderRejected",
         "preparing": "SupplierOrderPreparing",
-        "shipped": "ShipmentCreated",
+        "shipped": "SupplierOrderShipped",
         "delivered": "DeliveryCompleted",
         "cancelled": "SupplierOrderCancelled",
     }[status_value]
