@@ -10,7 +10,7 @@ router = APIRouter(prefix="/orders", tags=["orders"])
 
 
 @router.post("/from-proposal/{proposal_id}", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
-def create_order(proposal_id, user: CurrentUser, db: DbSession):
+def create_order(proposal_id: str, user: CurrentUser, db: DbSession):
     proposal = db.scalar(
         select(Proposal).options(selectinload(Proposal.items), selectinload(Proposal.quote))
         .where(Proposal.id == proposal_id, Proposal.tenant_id == user.tenant_id)
