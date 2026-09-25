@@ -214,11 +214,13 @@ def test_quote_and_order_generate_audit_and_events(client):
     )
     assert order.status_code == 201
 
+    from uuid import UUID
+
     from app.models import AuditLog, DomainEvent
     from app.db.session import SessionLocal
 
     with SessionLocal() as db:
-        audits = db.query(AuditLog).filter(AuditLog.tenant_id == __import__("uuid").UUID(quote["tenant_id"])).all()
+        audits = db.query(AuditLog).filter(AuditLog.tenant_id == UUID(quote["tenant_id"])).all()
         events = db.query(DomainEvent).filter(DomainEvent.tenant_id == __import__("uuid").UUID(quote["tenant_id"])).all()
 
     assert {a.action for a in audits} >= {"quote.created", "quote.supplier_requested", "supplier.proposal_received", "order.created"}
