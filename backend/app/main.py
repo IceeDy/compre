@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routers import (
     auth,
     commercial,
+    fulfillment,
     orders,
     supplier_orders,
     supplier_registrations,
@@ -15,7 +16,7 @@ from app.core.config import get_settings
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title=settings.app_name, version="0.4.0")
+    app = FastAPI(title=settings.app_name, version="0.5.0")
 
     app.add_middleware(
         CORSMiddleware,
@@ -32,6 +33,7 @@ def create_app() -> FastAPI:
     app.include_router(orders.router, prefix="/api/v1")
     app.include_router(supplier_registrations.router, prefix="/api/v1")
     app.include_router(supplier_orders.router, prefix="/api/v1")
+    app.include_router(fulfillment.router, prefix="/api/v1")
 
     @app.get("/health", tags=["health"])
     def health() -> dict[str, str]:
