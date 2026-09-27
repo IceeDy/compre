@@ -3,8 +3,8 @@ from .test_supplier_orders import _prepare_released_order
 
 
 def test_financial_snapshot_payment_and_settlement(client):
-    assert register(client, "finance-a", "finance-a@test.example").status_code == 201
-    token = login(client, "finance-a@test.example")
+    assert register(client, "finance-a", "finance-a@example.com").status_code == 201
+    token = login(client, "finance-a@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     order_id, supplier_id = _prepare_released_order(client, headers)
@@ -81,8 +81,8 @@ def test_financial_snapshot_payment_and_settlement(client):
 
 
 def test_finance_is_tenant_scoped(client):
-    assert register(client, "finance-x", "finance-x@test.example").status_code == 201
-    token_x = login(client, "finance-x@test.example")
+    assert register(client, "finance-x", "finance-x@example.com").status_code == 201
+    token_x = login(client, "finance-x@example.com")
     headers_x = {"Authorization": f"Bearer {token_x}"}
     order_id, _ = _prepare_released_order(client, headers_x)
 
@@ -99,8 +99,8 @@ def test_finance_is_tenant_scoped(client):
     )
     assert initialized.status_code == 201
 
-    assert register(client, "finance-y", "finance-y@test.example").status_code == 201
-    token_y = login(client, "finance-y@test.example")
+    assert register(client, "finance-y", "finance-y@example.com").status_code == 201
+    token_y = login(client, "finance-y@example.com")
     headers_y = {"Authorization": f"Bearer {token_y}"}
 
     response = client.get(
