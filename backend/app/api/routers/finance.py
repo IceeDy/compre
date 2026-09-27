@@ -103,13 +103,25 @@ def initialize_financial(
 
     financial = initialize_order_financial(db, user.tenant_id, order, rule)
     record_audit(
-        db, user.tenant_id, user.id, "financial.snapshot_created", "order_financial", financial.id,
-        {"order_id": str(order.id), "commission": str(financial.commission_amount)},
+        db,
+        tenant_id=user.tenant_id,
+        actor_user_id=user.id,
+        action="financial.snapshot_created",
+        entity_type="order_financial",
+        entity_id=financial.id,
+        metadata={"order_id": str(order.id), "commission": str(financial.commission_amount)},
     )
     record_event(
-        db, user.tenant_id, f"order:{order.id}:financial-initialized", "CommissionGenerated",
-        "order", order.id,
-        {"financial_id": str(financial.id), "commission": str(financial.commission_amount)},
+        db,
+        tenant_id=user.tenant_id,
+        event_key=f"order:{order.id}:financial-initialized",
+        event_type="CommissionGenerated",
+        aggregate_type="order",
+        aggregate_id=order.id,
+        payload={
+            "financial_id": str(financial.id),
+            "commission": str(financial.commission_amount),
+        },
     )
     db.commit()
     db.refresh(financial)
@@ -156,8 +168,13 @@ def create_payment(payload: PaymentCreate, user: CurrentUser, db: DbSession):
     db.add(payment)
     db.flush()
     record_event(
-        db, user.tenant_id, f"payment:{payment.id}:created", "PaymentCreated",
-        "payment", payment.id, {"order_id": str(payment.order_id), "amount": str(payment.amount)},
+        db,
+        tenant_id=user.tenant_id,
+        event_key=f"payment:{payment.id}:created",
+        event_type="PaymentCreated",
+        aggregate_type="payment",
+        aggregate_id=payment.id,
+        payload={"order_id": str(payment.order_id), "amount": str(payment.amount)},
     )
     db.commit()
     db.refresh(payment)
@@ -191,8 +208,13 @@ def update_payment(payment_id: str, payload: PaymentUpdate, user: CurrentUser, d
     if payload.status == "paid":
         payment.paid_at = datetime.now(UTC)
     record_event(
-        db, user.tenant_id, f"payment:{payment.id}:status:{payload.status}", "PaymentStatusChanged",
-        "payment", payment.id, {"status": payload.status},
+        db,
+        tenant_id=user.tenant_id,
+        event_key=f"payment:{payment.id}:status:{payload.status}",
+        event_type="PaymentStatusChanged",
+        aggregate_type="payment",
+        aggregate_id=payment.id,
+        payload={"status": payload.status},
     )
     db.commit()
     db.refresh(payment)
@@ -232,10 +254,13 @@ def pay_settlement(order_id: str, user: CurrentUser, db: DbSession):
     settlement.status = "paid"
     settlement.paid_at = datetime.now(UTC)
     record_event(
-        db, user.tenant_id, f"settlement:{settlement.id}:paid", "SettlementPaid",
-        "settlement",
-        settlement.id,
-        {"order_id": str(settlement.order_id), "amount": str(settlement.amount)},
+        db,
+        tenant_id=user.tenant_id,
+        event_key=f"settlement:{settlement.id}:paid",
+        event_type="SettlementPaid",
+        aggregate_type="settlement",
+        aggregate_id=settlement.id,
+        payload={"order_id": str(settlement.order_id), "amount": str(settlement.amount)},
     )
     db.commit()
     db.refresh(settlement)
@@ -257,8 +282,13 @@ def reconcile_settlement(order_id: str, user: CurrentUser, db: DbSession):
     settlement.status = "reconciled"
     settlement.reconciled_at = datetime.now(UTC)
     record_event(
-        db, user.tenant_id, f"settlement:{settlement.id}:reconciled", "ReconciliationCompleted",
-        "settlement", settlement.id, {"order_id": str(settlement.order_id)},
+        db,
+        tenant_id=user.tenant_id,
+        event_key=f"settlement:{settlement.id}:reconciled",
+        event_type="ReconciliationCompleted",
+        aggregate_type="settlement",
+        aggregate_id=settlement.id,
+        payload={"order_id": str(settlement.order_id)},
     )
     db.commit()
     db.refresh(settlement)
