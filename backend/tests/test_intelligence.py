@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from app.models import Tenant
@@ -14,7 +14,7 @@ def _tenant(db, slug: str) -> Tenant:
 
 def test_market_metric_requires_three_distinct_tenants(db):
     tenants = [_tenant(db, f"intel-{index}") for index in range(3)]
-    occurred_at = datetime(2026, 9, 1, tzinfo=timezone.utc)
+    occurred_at = datetime(2026, 9, 1, tzinfo=UTC)
 
     for index, tenant in enumerate(tenants, start=1):
         record_analytics_event(
