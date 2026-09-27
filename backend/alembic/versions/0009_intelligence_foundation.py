@@ -5,6 +5,7 @@ Revises: 0008_financial_core
 """
 
 import sqlalchemy as sa
+
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
