@@ -5,8 +5,8 @@ from .commission_rule import CommissionRule
 from .customer import Customer
 from .delivery import Delivery
 from .domain_event import DomainEvent
-from .order import Order, OrderItem
 from .market_metric import MarketMetric
+from .order import Order, OrderItem
 from .order_financial import OrderFinancial
 from .payment import Payment
 from .product import Product
