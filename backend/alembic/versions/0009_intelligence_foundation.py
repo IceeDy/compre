@@ -5,9 +5,9 @@ Revises: 0008_financial_core
 """
 
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 from alembic import op
-from sqlalchemy.dialects import postgresql
 
 revision = "0009_intelligence_foundation"
 down_revision = "0008_financial_core"
