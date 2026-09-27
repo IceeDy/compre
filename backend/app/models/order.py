@@ -20,6 +20,7 @@ class Order(Base):
     total: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
+    proposal = relationship("Proposal")
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
 
 

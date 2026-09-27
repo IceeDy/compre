@@ -1,14 +1,15 @@
 """add asynchronous supplier customer registration workflow
 
-Revision ID: 0005_supplier_customer_registration
+Revision ID: 0005_supplier_customer_reg
 Revises: 0004_governance_events
 """
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-revision = "0005_supplier_customer_registration"
+from alembic import op
+
+revision = "0005_supplier_customer_reg"
 down_revision = "0004_governance_events"
 branch_labels = None
 depends_on = None

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from fastapi import APIRouter, HTTPException, status
@@ -6,13 +6,34 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import CurrentUser, DbSession
-from app.models import Customer, Product, Proposal, ProposalItem, Quote, QuoteItem, QuoteSupplierRequest, Supplier
-from app.schemas.quote_engine import QuoteComparisonResponse, SupplierRequestCreate, SupplierRequestResponse
-from app.services.governance import record_audit, record_event
-from app.schemas.commercial import (
-    CustomerCreate, CustomerResponse, ProductCreate, ProductResponse, ProposalCreate, ProposalResponse,
-    QuoteCreate, QuoteResponse, SupplierCreate, SupplierResponse,
+from app.models import (
+    Customer,
+    Product,
+    Proposal,
+    ProposalItem,
+    Quote,
+    QuoteItem,
+    QuoteSupplierRequest,
+    Supplier,
 )
+from app.schemas.commercial import (
+    CustomerCreate,
+    CustomerResponse,
+    ProductCreate,
+    ProductResponse,
+    ProposalCreate,
+    ProposalResponse,
+    QuoteCreate,
+    QuoteResponse,
+    SupplierCreate,
+    SupplierResponse,
+)
+from app.schemas.quote_engine import (
+    QuoteComparisonResponse,
+    SupplierRequestCreate,
+    SupplierRequestResponse,
+)
+from app.services.governance import record_audit, record_event
 
 router = APIRouter(prefix="/commercial", tags=["commercial"])
 
@@ -107,7 +128,7 @@ def create_proposal(payload: ProposalCreate, user: CurrentUser, db: DbSession):
             total=item.unit_price * item.quantity,
         ) for item in payload.items
     ]
-    proposal.total = sum((item.total for item in proposal.items), Decimal("0"))
+    proposal.total = sum((item.total for item in proposal.items), Decimal(0))
     request = db.scalar(
         select(QuoteSupplierRequest).where(
             QuoteSupplierRequest.quote_id == quote.id,
@@ -117,7 +138,7 @@ def create_proposal(payload: ProposalCreate, user: CurrentUser, db: DbSession):
     )
     if request:
         request.status = "responded"
-        request.responded_at = datetime.now(timezone.utc)
+        request.responded_at = datetime.now(UTC)
     db.add(proposal)
     db.flush()
     record_audit(

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
@@ -137,7 +137,7 @@ def update_supplier_order(
     if payload.status == "rejected" and not payload.rejection_reason:
         raise HTTPException(400, "Rejection reason is required")
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     supplier_order.status = payload.status
     supplier_order.external_reference = payload.external_reference
     supplier_order.rejection_reason = payload.rejection_reason

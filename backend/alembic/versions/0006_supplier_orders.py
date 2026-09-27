@@ -1,15 +1,16 @@
 """add supplier fulfillment order workflow
 
 Revision ID: 0006_supplier_orders
-Revises: 0005_supplier_customer_registration
+Revises: 0005_supplier_customer_reg
 """
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
+
 revision = "0006_supplier_orders"
-down_revision = "0005_supplier_customer_registration"
+down_revision = "0005_supplier_customer_reg"
 branch_labels = None
 depends_on = None
 

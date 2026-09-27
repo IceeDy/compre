@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
@@ -158,7 +158,7 @@ def update_delivery(
     delivery.notes = payload.notes
 
     if payload.status == "delivered":
-        delivery.delivered_at = datetime.now(timezone.utc)
+        delivery.delivered_at = datetime.now(UTC)
 
     db.flush()
 

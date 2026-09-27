@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
@@ -115,7 +115,7 @@ def update_registration(
     registration.status = payload.status
     registration.external_reference = payload.external_reference
     registration.rejection_reason = payload.rejection_reason
-    registration.reviewed_at = datetime.now(timezone.utc)
+    registration.reviewed_at = datetime.now(UTC)
     db.flush()
 
     event_type = (

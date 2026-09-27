@@ -2,8 +2,8 @@ from .test_commercial import login, register
 
 
 def test_supplier_registration_is_asynchronous_and_blocks_only_order_release(client):
-    assert register(client, "registration-a", "registration@test.example").status_code == 201
-    token = login(client, "registration@test.example")
+    assert register(client, "registration-a", "registration@example.com").status_code == 201
+    token = login(client, "registration@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     customer = client.post(
@@ -83,8 +83,8 @@ def test_supplier_registration_is_asynchronous_and_blocks_only_order_release(cli
 
 
 def test_supplier_registration_is_tenant_scoped(client):
-    assert register(client, "registration-x", "registration-x@test.example").status_code == 201
-    token_x = login(client, "registration-x@test.example")
+    assert register(client, "registration-x", "registration-x@example.com").status_code == 201
+    token_x = login(client, "registration-x@example.com")
     headers_x = {"Authorization": f"Bearer {token_x}"}
 
     customer = client.post(
@@ -94,8 +94,8 @@ def test_supplier_registration_is_tenant_scoped(client):
         "/api/v1/commercial/suppliers", headers=headers_x, json={"name": "Fornecedor X"}
     ).json()
 
-    assert register(client, "registration-y", "registration-y@test.example").status_code == 201
-    token_y = login(client, "registration-y@test.example")
+    assert register(client, "registration-y", "registration-y@example.com").status_code == 201
+    token_y = login(client, "registration-y@example.com")
     headers_y = {"Authorization": f"Bearer {token_y}"}
 
     response = client.post(

@@ -7,7 +7,6 @@ from app.models import (
     Order,
     OrderItem,
     Proposal,
-    Quote,
     QuoteItem,
     SupplierCustomerRegistration,
 )

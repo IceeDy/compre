@@ -3,8 +3,8 @@ from .test_supplier_orders import _prepare_released_order
 
 
 def test_shipment_and_delivery_lifecycle(client):
-    assert register(client, "delivery-a", "delivery@test.example").status_code == 201
-    token = login(client, "delivery@test.example")
+    assert register(client, "delivery-a", "delivery@example.com").status_code == 201
+    token = login(client, "delivery@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     order_id, _ = _prepare_released_order(client, headers)
@@ -53,8 +53,8 @@ def test_shipment_and_delivery_lifecycle(client):
 
 
 def test_delivery_requires_recipient_when_delivered(client):
-    assert register(client, "delivery-b", "delivery-b@test.example").status_code == 201
-    token = login(client, "delivery-b@test.example")
+    assert register(client, "delivery-b", "delivery-b@example.com").status_code == 201
+    token = login(client, "delivery-b@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     order_id, _ = _prepare_released_order(client, headers)

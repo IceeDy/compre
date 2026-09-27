@@ -7,8 +7,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class CommissionRuleCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
-    rate_percent: Decimal = Field(default=Decimal("0"), ge=0, le=100)
-    fixed_amount: Decimal = Field(default=Decimal("0"), ge=0)
+    rate_percent: Decimal = Field(default=Decimal(0), ge=0, le=100)
+    fixed_amount: Decimal = Field(default=Decimal(0), ge=0)
     supplier_id: UUID | None = None
 
 

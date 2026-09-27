@@ -10,8 +10,8 @@ def login(client, email):
 
 
 def test_commercial_flow_is_tenant_scoped(client):
-    assert register(client, "commerce-a", "a@test.example").status_code == 201
-    token = login(client, "a@test.example")
+    assert register(client, "commerce-a", "a@example.com").status_code == 201
+    token = login(client, "a@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     customer = client.post("/api/v1/commercial/customers", headers=headers, json={"name": "Cliente A"})
@@ -56,14 +56,14 @@ def test_commercial_flow_is_tenant_scoped(client):
 
 
 def test_cross_tenant_resources_are_rejected(client):
-    assert register(client, "tenant-x", "x@test.example").status_code == 201
-    token_x = login(client, "x@test.example")
+    assert register(client, "tenant-x", "x@example.com").status_code == 201
+    token_x = login(client, "x@example.com")
     headers_x = {"Authorization": f"Bearer {token_x}"}
     customer = client.post("/api/v1/commercial/customers", headers=headers_x, json={"name": "Private Customer"})
     customer_id = customer.json()["id"]
 
-    assert register(client, "tenant-y", "y@test.example").status_code == 201
-    token_y = login(client, "y@test.example")
+    assert register(client, "tenant-y", "y@example.com").status_code == 201
+    token_y = login(client, "y@example.com")
     headers_y = {"Authorization": f"Bearer {token_y}"}
 
     product_y = client.post("/api/v1/commercial/products", headers=headers_y, json={
@@ -77,8 +77,8 @@ def test_cross_tenant_resources_are_rejected(client):
 
 
 def test_quote_engine_compares_best_mix_and_nonresponsive_suppliers(client):
-    assert register(client, "engine-a", "engine@test.example").status_code == 201
-    token = login(client, "engine@test.example")
+    assert register(client, "engine-a", "engine@example.com").status_code == 201
+    token = login(client, "engine@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     customer = client.post(
@@ -173,8 +173,8 @@ def test_quote_engine_compares_best_mix_and_nonresponsive_suppliers(client):
 
 
 def test_quote_and_order_generate_audit_and_events(client):
-    assert register(client, "audit-a", "audit@test.example").status_code == 201
-    token = login(client, "audit@test.example")
+    assert register(client, "audit-a", "audit@example.com").status_code == 201
+    token = login(client, "audit@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     customer = client.post("/api/v1/commercial/customers", headers=headers, json={"name": "Cliente Audit"}).json()
@@ -216,8 +216,8 @@ def test_quote_and_order_generate_audit_and_events(client):
 
     from uuid import UUID
 
-    from app.models import AuditLog, DomainEvent
     from app.db.session import SessionLocal
+    from app.models import AuditLog, DomainEvent
 
     with SessionLocal() as db:
         audits = db.query(AuditLog).filter(AuditLog.tenant_id == UUID(quote["tenant_id"])).all()

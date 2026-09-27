@@ -4,9 +4,10 @@ Revision ID: 0004_governance_events
 Revises: 0003_quote_supplier_requests
 """
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 revision = "0004_governance_events"
 down_revision = "0003_quote_supplier_requests"
