@@ -76,7 +76,7 @@ def aggregate_market_metric(
     if distinct_tenants < minimum_distinct_tenants:
         return None
 
-    average = sum((row.value for row in rows), Decimal("0")) / len(rows)
+    average = sum((row.value for row in rows), Decimal(0)) / len(rows)
     first = rows[0]
     metric = db.scalar(
         select(MarketMetric).where(
