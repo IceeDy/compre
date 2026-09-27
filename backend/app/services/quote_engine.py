@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.models import Proposal, Quote, QuoteItem, QuoteSupplierRequest, Supplier
+from app.models import Proposal, Quote, QuoteSupplierRequest
 
 
 def compare_quote(db: Session, quote: Quote) -> dict:
@@ -31,7 +31,7 @@ def compare_quote(db: Session, quote: Quote) -> dict:
             by_item.setdefault(item.quote_item_id, []).append((proposal, item))
 
     items = []
-    best_mix_total = Decimal("0")
+    best_mix_total = Decimal(0)
     covered = 0
 
     for quote_item in quote.items:
@@ -77,7 +77,7 @@ def compare_quote(db: Session, quote: Quote) -> dict:
             "coverage": supplier_coverage,
             "coverage_percent": (
                 Decimal(supplier_coverage * 100) / Decimal(len(quote.items))
-                if quote.items else Decimal("0")
+                if quote.items else Decimal(0)
             ),
             "total": supplier_total,
             "savings_vs_best_mix": (
@@ -91,7 +91,7 @@ def compare_quote(db: Session, quote: Quote) -> dict:
         "quote_id": quote.id,
         "item_count": len(quote.items),
         "covered_item_count": covered,
-        "coverage_percent": Decimal(covered * 100) / Decimal(len(quote.items)) if quote.items else Decimal("0"),
+        "coverage_percent": Decimal(covered * 100) / Decimal(len(quote.items)) if quote.items else Decimal(0),
         "best_mix_total": best_mix_total if covered else None,
         "items": items,
         "suppliers": supplier_rows,

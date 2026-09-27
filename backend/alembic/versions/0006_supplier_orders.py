@@ -4,9 +4,10 @@ Revision ID: 0006_supplier_orders
 Revises: 0005_supplier_customer_registration
 """
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 revision = "0006_supplier_orders"
 down_revision = "0005_supplier_customer_registration"

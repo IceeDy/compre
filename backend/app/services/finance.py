@@ -25,7 +25,7 @@ def initialize_order_financial(
 
     rate = Decimal(rule.rate_percent)
     fixed = Decimal(rule.fixed_amount)
-    commission = (Decimal(order.total) * rate / Decimal("100")) + fixed
+    commission = (Decimal(order.total) * rate / Decimal(100)) + fixed
     if commission > Decimal(order.total):
         raise HTTPException(422, "Commission cannot exceed order total")
 

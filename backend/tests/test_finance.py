@@ -1,5 +1,5 @@
-from .test_supplier_orders import _prepare_released_order
 from .test_commercial import login, register
+from .test_supplier_orders import _prepare_released_order
 
 
 def test_financial_snapshot_payment_and_settlement(client):

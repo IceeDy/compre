@@ -216,8 +216,8 @@ def test_quote_and_order_generate_audit_and_events(client):
 
     from uuid import UUID
 
-    from app.models import AuditLog, DomainEvent
     from app.db.session import SessionLocal
+    from app.models import AuditLog, DomainEvent
 
     with SessionLocal() as db:
         audits = db.query(AuditLog).filter(AuditLog.tenant_id == UUID(quote["tenant_id"])).all()

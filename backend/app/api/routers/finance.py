@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import func, select
@@ -189,7 +189,7 @@ def update_payment(payment_id: str, payload: PaymentUpdate, user: CurrentUser, d
     if payload.provider_reference:
         payment.provider_reference = payload.provider_reference
     if payload.status == "paid":
-        payment.paid_at = datetime.now(timezone.utc)
+        payment.paid_at = datetime.now(UTC)
     record_event(
         db, user.tenant_id, f"payment:{payment.id}:status:{payload.status}", "PaymentStatusChanged",
         "payment", payment.id, {"status": payload.status},
@@ -230,7 +230,7 @@ def pay_settlement(order_id: str, user: CurrentUser, db: DbSession):
     if settlement.status not in {"pending", "scheduled"}:
         raise HTTPException(409, "Settlement cannot be paid from its current status")
     settlement.status = "paid"
-    settlement.paid_at = datetime.now(timezone.utc)
+    settlement.paid_at = datetime.now(UTC)
     record_event(
         db, user.tenant_id, f"settlement:{settlement.id}:paid", "SettlementPaid",
         "settlement",
@@ -255,7 +255,7 @@ def reconcile_settlement(order_id: str, user: CurrentUser, db: DbSession):
     if settlement.status != "paid":
         raise HTTPException(409, "Settlement must be paid before reconciliation")
     settlement.status = "reconciled"
-    settlement.reconciled_at = datetime.now(timezone.utc)
+    settlement.reconciled_at = datetime.now(UTC)
     record_event(
         db, user.tenant_id, f"settlement:{settlement.id}:reconciled", "ReconciliationCompleted",
         "settlement", settlement.id, {"order_id": str(settlement.order_id)},
