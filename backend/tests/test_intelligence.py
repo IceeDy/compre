@@ -46,7 +46,7 @@ def test_market_metric_requires_three_distinct_tenants(db):
 
 def test_market_metric_is_suppressed_below_threshold(db):
     tenants = [_tenant(db, f"intel-threshold-{index}") for index in range(2)]
-    occurred_at = datetime(2026, 9, 2, tzinfo=timezone.utc)
+    occurred_at = datetime(2026, 9, 2, tzinfo=UTC)
 
     for tenant in tenants:
         record_analytics_event(
@@ -54,7 +54,7 @@ def test_market_metric_is_suppressed_below_threshold(db):
             tenant_id=tenant.id,
             metric_key="lead_time.average",
             scope_key="cafe-500g",
-            value=Decimal("3"),
+            value=Decimal(3),
             unit="day",
             occurred_at=occurred_at,
         )
