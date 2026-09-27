@@ -53,8 +53,8 @@ def _prepare_released_order(client, headers):
 
 
 def test_supplier_order_full_lifecycle(client):
-    assert register(client, "fulfillment-a", "fulfillment@test.example").status_code == 201
-    token = login(client, "fulfillment@test.example")
+    assert register(client, "fulfillment-a", "fulfillment@example.com").status_code == 201
+    token = login(client, "fulfillment@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     order_id, supplier_id = _prepare_released_order(client, headers)
@@ -88,8 +88,8 @@ def test_supplier_order_full_lifecycle(client):
 
 
 def test_supplier_order_rejects_invalid_transition_and_duplicate(client):
-    assert register(client, "fulfillment-b", "fulfillment-b@test.example").status_code == 201
-    token = login(client, "fulfillment-b@test.example")
+    assert register(client, "fulfillment-b", "fulfillment-b@example.com").status_code == 201
+    token = login(client, "fulfillment-b@example.com")
     headers = {"Authorization": f"Bearer {token}"}
 
     order_id, _ = _prepare_released_order(client, headers)
@@ -114,8 +114,8 @@ def test_supplier_order_rejects_invalid_transition_and_duplicate(client):
 
 
 def test_supplier_orders_are_tenant_scoped(client):
-    assert register(client, "fulfillment-x", "fulfillment-x@test.example").status_code == 201
-    token_x = login(client, "fulfillment-x@test.example")
+    assert register(client, "fulfillment-x", "fulfillment-x@example.com").status_code == 201
+    token_x = login(client, "fulfillment-x@example.com")
     headers_x = {"Authorization": f"Bearer {token_x}"}
     order_id, _ = _prepare_released_order(client, headers_x)
 
@@ -125,8 +125,8 @@ def test_supplier_orders_are_tenant_scoped(client):
     )
     supplier_order_id = created.json()["id"]
 
-    assert register(client, "fulfillment-y", "fulfillment-y@test.example").status_code == 201
-    token_y = login(client, "fulfillment-y@test.example")
+    assert register(client, "fulfillment-y", "fulfillment-y@example.com").status_code == 201
+    token_y = login(client, "fulfillment-y@example.com")
     headers_y = {"Authorization": f"Bearer {token_y}"}
 
     response = client.patch(
