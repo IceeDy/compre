@@ -61,6 +61,7 @@ def aggregate_market_metric(
     if minimum_distinct_tenants < 1:
         raise IntelligenceGovernanceError("Minimum tenant threshold must be positive")
 
+    db.flush()
     rows = db.scalars(
         select(AnalyticsEvent).where(
             AnalyticsEvent.metric_key == metric_key,
