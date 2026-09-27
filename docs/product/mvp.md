@@ -49,8 +49,8 @@
 ## Fase 4 — Intelligence
 
 - [ ] Pipeline de eventos
-- [ ] Camada analítica
-- [ ] Indicadores agregados
+- [x] Camada analítica
+- [x] Indicadores agregados
 - [ ] Benchmark
 - [ ] Produtos de dados
 

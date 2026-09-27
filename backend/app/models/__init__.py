@@ -1,9 +1,11 @@
+from .analytics_event import AnalyticsEvent
 from .audit_log import AuditLog
 from .commission import Commission
 from .commission_rule import CommissionRule
 from .customer import Customer
 from .delivery import Delivery
 from .domain_event import DomainEvent
+from .market_metric import MarketMetric
 from .order import Order, OrderItem
 from .order_financial import OrderFinancial
 from .payment import Payment
@@ -21,12 +23,14 @@ from .tenant import Tenant
 from .user import User
 
 __all__ = [
+    "AnalyticsEvent",
     "AuditLog",
     "Commission",
     "CommissionRule",
     "Customer",
     "Delivery",
     "DomainEvent",
+    "MarketMetric",
     "Order",
     "OrderFinancial",
     "OrderItem",
